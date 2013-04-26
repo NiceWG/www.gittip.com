@@ -1,0 +1,23 @@
+"""Part of Bountysource oauth.
+
+From here we redirect users to Bitbucket after storing needed info in an
+in-memory cache. We get them again at www/on/bitbucket/associate.
+
+"""
+import requests
+from urlparse import parse_qs
+from aspen import log
+from gittip.elsewhere import bountysource
+
+# ========================== ^L
+
+then = qs.get('then', '')
+redirect_url = qs.get('redirect_url', website.bountysource_callback)
+
+url = "%s#auth/gittip/confirm?%s"
+
+log(u"Redirect to Bountysource for authorization...\n%s" % url)
+
+request.redirect(url % (bountysource.BASE_WWW_URL, qs.raw))
+
+# ========================== ^L text/plain

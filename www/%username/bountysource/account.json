@@ -1,0 +1,18 @@
+import requests
+
+from aspen import Response, log, log_dammit
+from gittip.elsewhere import bountysource
+
+# ============================================== ^L
+
+request.allow("GET")
+
+access_token = qs.get('access_token', '')
+participant = bountysource.get_participant_via_access_token(path['username'], access_token)
+
+if participant and participant.username == path['username']:
+    response.body = { 
+        "balance": participant.balance or 0.0
+    }
+else:
+    raise Response(404)

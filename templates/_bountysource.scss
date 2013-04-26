@@ -1,0 +1,17 @@
+.as-content.bountysource {
+
+    border-top: 5px solid rgba($brown, 0.5);
+    
+    .account-balance { 
+        color: $green;
+    }
+    
+    form#bountysource-issue-search {
+        
+        input {
+            width: 20em;
+        }
+        
+    }
+    
+}
