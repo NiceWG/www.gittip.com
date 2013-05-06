@@ -133,22 +133,24 @@ receivers = _wrap(db.fetchall("""
                 <button type="submit">Go</button>
             </span>
         </form>
-    </div>
-    {% if not user.ANON and user.balance > 0 %}
-        <div class="as-content bountysource">
-            <h1>GitHub Issues</h1>
-            <p>Use your <span class='account-balance'>${{ user.balance }}</span> balance to create bounties.</p>
         
-            <form id="bountysource-issue-search">
-                <span class="luxury">
-                    <input placeholder="https://github.com/gittip/www.gittip.com/issues/1" />
-                </span>
-                <span class="nowrap">
-                    <button type="submit">Search</button>
-                </span>
-            </form>
-        </div>
-    {% end %}
+        {% if not user.ANON and user.balance > 0 %}
+            <br />
+            <div class='bountysource-content'>
+                <p>Use your <span class='account-balance'>${{ user.balance }}</span> balance to create bounties.</p>
+                <form id="bountysource-issue-search">
+                    <span class="luxury">
+                        <input type="search" placeholder="Enter an issue URL..." />
+                    </span>
+                    <span class="nowrap">
+                        <button type="submit">Search</button>
+                    </span>
+                </form>
+            </div>
+        {% end %}
+        
+        
+    </div>
 {% end %}
 {% block page %}
 

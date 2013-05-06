@@ -2,38 +2,32 @@
 
 First, must receive token from Bountysource by authorizing the application.
 """
-from urlparse import parse_qs
-
-import requests
-from aspen import json, log, Response
-from aspen import resources
-from gittip import mixpanel
-from gittip.elsewhere import ACTIONS, bountysource
-from gittip.participant import NeedConfirmation
+from aspen import log, Response
+from gittip.elsewhere import bountysource
 
 # ========================== ^L
 
-token = qs.get('access_token', None)
-username = qs.get('username', None)
+if user.ANON:
+    raise Response(404)
 
-if username:
-    
-    if token:
-        # fetch public user_info from Bountysource
-        user_info = bountysource.get_user_info(username)
+# Gittip generated access token, passed all the way through the auth process
+token = qs.get('access_token', '')
 
-        # create a linked account
-        account = bountysource.BountysourceAccount(user_info['id'], user_info)
+# find participant from Bountysource created access token.
+# it better be the logged in user, dammit.
+participant = bountysource.get_participant_via_access_token(token)
 
-        # associate with the Gittip participant
-        user.take_over(account)
+if participant != user:
+    raise Response(400)
 
-        request.redirect('/%s' % account.participant)
-        
-    else:
-        request.redirect('/%s' % username)
-    
 else:
-    request.redirect('/')
+    # create a linked account
+    params = bountysource.filter_params(qs)
+    account = bountysource.BountysourceAccount(params['id'], params)
+
+    # associate with the Gittip participant
+    user.take_over(account)
+
+    request.redirect('/%s' % account.participant)
 
 # ========================== ^L text/plain

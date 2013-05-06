@@ -8,6 +8,9 @@ from gittip.elsewhere import bountysource
 
 # ========================== ^L
 
+if user.ANON:
+    raise Response(404)
+
 github_account, twitter_account, bitbucket_account, bountysource_account = user.get_accounts_elsewhere()
 
 search_url = bountysource.search_url(path['query'])
@@ -16,7 +19,7 @@ if bountysource_account:
     request.redirect(search_url)
 else:
     # return auth URL with search URL as the callback
-    auth_url = bountysource.oauth_url(website, participant, search_url)
+    auth_url = bountysource.oauth_url(website, user, search_url)
     request.redirect(auth_url)
 
 # ========================== ^L

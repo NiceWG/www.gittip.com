@@ -4,6 +4,29 @@ from aspen import Response, log
 from aspen.utils import to_age
 from gittip import db, AMOUNTS
 from gittip.utils import get_participant
+from gittip.elsewhere import bountysource
+
+# ids for Bountysource exchange rows
+def bountysource_exchange_ids(username):
+    # fetch bountysource exchanges
+    exchanges = list(db.fetchall( "SELECT id FROM exchanges "
+                                      "WHERE recorder=%s "
+                                      "ORDER BY timestamp ASC"
+                                    , (bountysource.participant,)
+                                     ))
+    # map bountysource exchange ids
+    return [ row['id'] for row in exchanges ]
+
+
+# select bountysource exchanges for Participant (through username)
+def select_bountysource_exchanges(username):
+    ids = bountysource_exchange_ids(username)
+    exchanges = list(db.fetchall( "SELECT * FROM exchanges "
+                                    "WHERE participant=%s "
+                                    "ORDER BY timestamp ASC"
+                                  , (username,)
+                                   ))
+    return [ e for e in exchanges if e['id'] in ids ]
 
 
 class Paydays(object):
@@ -13,6 +36,7 @@ class Paydays(object):
         self._paydays = list(db.fetchall("SELECT ts_start, ts_end FROM paydays "
                                          "ORDER BY ts_end DESC"))
         self._npaydays = len(self._paydays)
+        
         self._exchanges = list(db.fetchall( "SELECT * FROM exchanges "
                                             "WHERE participant=%s "
                                             "ORDER BY timestamp ASC"
@@ -24,6 +48,10 @@ class Paydays(object):
                                           , (username, username)
                                           ))
         self._balance = balance
+        
+        # filter out bountysource exchanges
+        ids = bountysource_exchange_ids(username)
+        self._exchanges = [ e for e in self._exchanges if e['id'] not in ids ]
 
 
     def __iter__(self):
@@ -38,7 +66,6 @@ class Paydays(object):
         """
         _i = 1
         for payday in self._paydays:
-
             if not (self._exchanges or self._transfers):
                 # Show all paydays since the user started really participating.
                 break
@@ -78,12 +105,13 @@ class Paydays(object):
                     event = self._transfers.pop()
                 else:
                     event = self._exchanges.pop()
-
+                
                 if 'fee' in event:
                     if event['amount'] > 0:
                         event['event'] = 'charge'
                     else:
                         event['event'] = 'credit'
+                        
                 else:
                     event['event'] = 'transfer'
 
@@ -109,12 +137,11 @@ class Paydays(object):
                         received['n'] += 1
 
                         #continue  # Don't leak!
-
+                
                 events.append(event)
 
             if not events:
                 continue
-
 
             # Calculate balance.
             # ==================
@@ -139,16 +166,18 @@ class Paydays(object):
             for event in reversed(events):
                 yield event
             yield payday_end
-
+        
         # This should catch that logic bug.
         if self._exchanges or self._transfers:
             log("These should be empty:", self._exchanges, self._transfers)
             raise "Logic bug in payday timestamping."
 
+
 # ========================================================================== ^L
 
 participant = get_participant(request, restrict=True)
 paydays = Paydays(participant.username, participant.balance)
+bounties = select_bountysource_exchanges(participant.username)
 hero = "History"
 title = "%s - %s" % (participant.username, hero)
 locked = False
@@ -179,6 +208,32 @@ locked = False
         </form>
         {% end %}
     </td></tr>
+
+
+    
+    {% if bounties %}
+        <tr>
+            <th colspan="7">
+                <h2>Bounties via <a href="{{ bountysource.www_host }}">Bountysource</a></h2>
+            </th>
+        </tr>
+        {% for bounty in bounties %}
+        <tr>
+            <td class="bank">Bountysource</td>
+            <td>{{ bounty['amount'] + bounty['fee'] }}</td>
+            <td class="fees">{{ bounty['fee'] }}</td>
+            <td class="credits"></td>
+            <td class="debits">{{ bounty['amount'] }}</td>
+            <td class="balance">{{ 1000 }}</td>
+            <td class="notes">
+                <a href="{{ "gittip/www.gittip.com fdsafdsafdsafdsafdsafdsa" }}">[url to issue with bounty]</a>
+            </td>
+        </tr>
+        {% end %}
+    {% end %}
+
+
+    
     {% for event in paydays %}
     {% if event['event'] == 'payday-start' %}
     <tr>
@@ -284,7 +339,6 @@ locked = False
                 <a href="/{{ event['tippee'] }}/">{{ event['tippee'] }}</a></td>
             {% end %}
         {% end %}
-
     </tr>
     {% end %}
 {% end %}
