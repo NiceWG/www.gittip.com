@@ -4,6 +4,7 @@ import requests
 import os
 import md5
 import time
+import re
 from aspen import json, log, Response
 from aspen.website import Website
 from aspen.utils import typecheck
@@ -122,5 +123,26 @@ def filter_params(params):
             filtered_params[key] = params[key]
     
     return filtered_params
+
+
+def item_number_to_url(item_number):
+    """Convert an item number to a URL on bountysource.
+    item_number is stored on the note column of bounty/pledge exchange rows.
+    """
+    bounty_regex = re.compile('^issues/(\d+)$')
+    pledge_regex = re.compile('^fundraisers/(\d+)(?:/(\d+))$')
+    
+    if bounty_regex.match(item_number):
+        match = bounty_regex.match(item_number)
+        return "%s#issues/%s" % (www_host, match.group(1))
+    
+    elif pledge_regex.match(item_number):
+        match = pledge_regex.match(item_number)
+        return "%s#fundraisers/%s" % (www_host, match.group(1))
+
+
+
+
+
 
 

@@ -14,8 +14,6 @@ request.allow("GET")
 token = qs.get('access_token', '')
 participant = bountysource.get_participant_via_access_token(token)
 
-log('token: %s' % token, 'participant: %s' % participant)
-
 if not participant:
     response.status = 401
     response.body = { 'error': 'Unauthorized' }

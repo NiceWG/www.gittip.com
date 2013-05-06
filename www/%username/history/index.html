@@ -209,8 +209,6 @@ locked = False
         {% end %}
     </td></tr>
 
-
-    
     {% if bounties %}
         <tr>
             <th colspan="7">
@@ -224,16 +222,14 @@ locked = False
             <td class="fees">{{ bounty['fee'] }}</td>
             <td class="credits"></td>
             <td class="debits">{{ bounty['amount'] }}</td>
-            <td class="balance">{{ 1000 }}</td>
+            <td class="balance"></td>
             <td class="notes">
-                <a href="{{ "gittip/www.gittip.com fdsafdsafdsafdsafdsafdsa" }}">[url to issue with bounty]</a>
+                <a href="{{ bountysource.item_number_to_url(bounty['note']) }}">{{ bountysource.item_number_to_url(bounty['note']) }}</a>
             </td>
         </tr>
         {% end %}
     {% end %}
 
-
-    
     {% for event in paydays %}
     {% if event['event'] == 'payday-start' %}
     <tr>
