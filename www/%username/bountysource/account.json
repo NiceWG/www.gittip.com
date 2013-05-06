@@ -4,22 +4,26 @@ Requires a valid Gittip username and associated Bountysource linked account acce
 Access tokens are created from gittip.elsewhere.bountysource.create_access_token with
 a Gittip Participant id and Bountysource API secret.
 """
-
-import requests
-
-from aspen import Response, log, log_dammit
+from aspen import Response, log
 from gittip.elsewhere import bountysource
 
 # ============================================== ^L
 
 request.allow("GET")
 
-access_token = qs.get('access_token', '')
-participant = bountysource.get_participant_via_access_token(path['username'], access_token)
+token = qs.get('access_token', '')
+participant = bountysource.get_participant_via_access_token(token)
 
-if participant and participant.username == path['username']:
-    response.body = { 
-        "balance": participant.balance or 0.0
-    }
+log('token: %s' % token, 'participant: %s' % participant)
+
+if not participant:
+    response.status = 401
+    response.body = { 'error': 'Unauthorized' }
+
+
 else:
-    raise Response(404)
+    response.status = 200    
+    response.body = { 
+        "balance": participant.balance or 0.0,
+        "login": participant.username
+    }
