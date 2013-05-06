@@ -1,0 +1,70 @@
+"""POST Action to create an IPN at Bountysource
+"""
+import requests
+from urllib import urlencode
+from decimal import Decimal
+from aspen import log, Response
+from gittip import db
+from gittip.elsewhere import bountysource
+
+# ========================================== ^L
+
+if user.ANON:
+    raise Response(404)
+
+if not POST:
+    raise Response(405)
+
+token = body.get('access_token', '')
+participant = bountysource.get_participant_via_access_token(token)
+
+if not participant:
+    raise Response(401)
+
+log('Authorize Bountysource payment with params: %s' % body)
+
+try:
+    amount = Decimal(body['amount'])
+    fee = Decimal(body.get('fee', '0.0'))
+    note = body['item_number']
+except:
+    raise Response(422)
+
+# Why is txn.fetchone not the same as db.fetchone? sigh.
+# I don't think the creation of the transaction below
+# is in the transaction, but it really should be.
+with db.get_transaction() as txn:
+    # create the exchange, returning the ID
+    exchange = db.fetchone("""
+        INSERT INTO exchanges
+        (amount, fee, participant, recorder, note)
+        VALUES (%s, %s, %s, %s, %s)
+        RETURNING id
+    """, (amount, fee, participant.username, bountysource.participant, note))
+
+    # if the exchange was created successfully, append id to IPN params
+    if exchange:
+        body['txn_id'] = int(exchange['id'])
+
+    # update balance of participant
+    txn.execute("""
+        UPDATE participants
+        SET balance = balance - %s
+        WHERE username = %s
+    """, (amount + fee, participant.username))
+
+# POST to Bountysource to create IPN
+create_ipn_url = '%spayments/gittip_ipn' % (bountysource.api_host)
+create_ipn_response = requests.post(create_ipn_url, data=body)
+
+log('POST IPN create to Bountysource: %s POST %s' % (create_ipn_response.status_code, create_ipn_url))
+
+# post to bountysource for return
+return_url = '%spayments/gittip_return' % (bountysource.api_host)
+return_response = requests.post(return_url, data=body, allow_redirects=True)
+
+log('Return to Bountysource: %s POST %s' % (return_response.status_code, return_url))
+
+request.redirect(return_response.url)
+
+# ========================================== ^L text/plain
