@@ -130,6 +130,23 @@ receivers = _wrap(db.fetchall("""
                 <button type="submit">Go</button>
             </span>
         </form>
+        
+        {% if not user.ANON and user.balance > 0 %}
+            <br />
+            <div class='bountysource-content'>
+                <p>Use your <span class='account-balance'>${{ user.balance }}</span> balance to create bounties.</p>
+                <form id="bountysource-issue-search">
+                    <span class="luxury">
+                        <input type="search" placeholder="Enter an issue URL..." />
+                    </span>
+                    <span class="nowrap">
+                        <button type="submit">Search</button>
+                    </span>
+                </form>
+            </div>
+        {% end %}
+        
+        
     </div>
 
     <div class="nav level-1">Or browse <a

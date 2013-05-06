@@ -729,16 +729,3 @@ Gittip.communities.leave = function(name, callback)
         Gittip.communities.update(name, false, callback);
 
 }
-
-Gittip.initJumpToBountysourceIssue = function()
-{
-    $('#bountysource-issue-search').submit(function (e) {
-        var query = $('#bountysource-issue-search INPUT').val().trim();
-        e.preventDefault();
-        e.stopPropagation();
-        if (query !== '')
-            window.location = '/on/bountysource/search/' + query + '/';
-        return false;
-    });
-}
-
