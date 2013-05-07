@@ -17,7 +17,7 @@ github_account, twitter_account, bitbucket_account, bountysource_account = user.
 search_query = body['query']
 search_url = bountysource.search_url(search_query)
 
-# require link of Bountysource account if necessary
+# require linking of a Bountysource account if necessary, passing in search_url as the redirect_url
 if not bountysource_account:
     auth_url = bountysource.oauth_url(website, user, search_url)
     request.redirect(auth_url)

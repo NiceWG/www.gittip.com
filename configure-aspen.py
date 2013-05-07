@@ -30,6 +30,8 @@ website.twitter_consumer_key = os.environ['TWITTER_CONSUMER_KEY'].decode('ASCII'
 website.twitter_consumer_secret = os.environ['TWITTER_CONSUMER_SECRET'].decode('ASCII')
 website.twitter_callback = os.environ['TWITTER_CALLBACK'].decode('ASCII')
 
+website.bountysource_www_host = os.environ['BOUNTYSOURCE_WWW_HOST'].decode('ASCII')
+website.bountysource_api_host = os.environ['BOUNTYSOURCE_API_HOST'].decode('ASCII')
 website.bountysource_api_secret = os.environ['BOUNTYSOURCE_API_SECRET'].decode('ASCII')
 website.bountysource_callback = os.environ['BOUNTYSOURCE_CALLBACK'].decode('ASCII')
 

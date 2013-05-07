@@ -13,8 +13,8 @@ from gittip.models import Participant
 from gittip.elsewhere import ACTIONS, AccountElsewhere, _resolve
 
 participant = 'Bountysource'
-api_host = "http://api.bountysource.dev/"
-www_host = "http://www.bountysource.dev/"
+www_host = os.environ['BOUNTYSOURCE_WWW_HOST'].decode('ASCII')
+api_host = os.environ['BOUNTYSOURCE_API_HOST'].decode('ASCII')
 
 class BountysourceAccount(AccountElsewhere):
     platform = u'bountysource'
@@ -65,7 +65,10 @@ def oauth_url(website, participant, redirect_url=None):
     :returns:
         URL for Bountysource account authorization
     """
-    return "/on/bountysource/redirect"
+    if redirect_url:
+        return "/on/bountysource/redirect?redirect_url=%s" % redirect_url
+    else:
+        return "/on/bountysource/redirect"
 
 
 def search_url(query):
