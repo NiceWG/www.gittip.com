@@ -19,16 +19,6 @@ item_number = qs['item_number']
 
 {% extends templates/base.html %}
 
-<script type="text/javascript">
-$('form#authorize-bountysource-payment').submit(function() {
-    this.preventDefault();
-    this.stopPropagation();
-    
-    alert('fdsa');
-    console.log(this);
-});
-</script>
-
 {% block heading %}
     <h2 class="top"><span>Authorize Bountysource Payment</span></h2>
 {% end %}    
