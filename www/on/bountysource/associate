@@ -17,7 +17,7 @@ token = qs.get('access_token', '')
 # it better be the logged in user, dammit.
 participant = bountysource.get_participant_via_access_token(token)
 
-if participant != user:
+if not participant or participant != user:
     raise Response(400)
 
 else:
