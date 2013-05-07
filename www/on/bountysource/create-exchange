@@ -27,6 +27,7 @@ try:
     amount = Decimal(body['amount'])
     fee = Decimal(body.get('fee', '0.0'))
     note = body['item_number']
+    cancel_url = body.get('cancel_url', bountysource.www_host)
 except:
     raise Response(422)
 
@@ -56,15 +57,27 @@ with db.get_transaction() as txn:
 # POST to Bountysource to create IPN
 create_ipn_url = '%spayments/gittip_ipn' % (bountysource.api_host)
 create_ipn_response = requests.post(create_ipn_url, data=body)
-
 log('POST IPN create to Bountysource: %s POST %s' % (create_ipn_response.status_code, create_ipn_url))
 
-# post to bountysource for return
-return_url = '%spayments/gittip_return' % (bountysource.api_host)
-return_response = requests.post(return_url, data=body, allow_redirects=True)
+if create_ipn_response.status_code not in range(200,301):
+    # if the IPN create response failed, proceed directly to jail, if passing GO do not collect $200.
+    # Delete the exchange and redirect to cancel_url. 
+    # This should really be in a database transaction bleh.
+    if body.get('txn_id'):
+        db.execute("""
+            DELETE FROM exchanges
+            WHERE id=%s
+        """, (body['txn_id']))
+        
+        request.redirect(cancel_url)
 
-log('Return to Bountysource: %s POST %s' % (return_response.status_code, return_url))
-
-request.redirect(return_response.url)
+else:
+    # post to bountysource to get to receipt page!
+    return_url = '%spayments/gittip_return' % (bountysource.api_host)
+    return_response = requests.post(return_url, data=body, allow_redirects=True)
+    log('Return to Bountysource: %s POST %s' % (return_response.status_code, return_url))
+    
+    # follow URL from return response
+    request.redirect(return_response.url)
 
 # ========================================== ^L text/plain
