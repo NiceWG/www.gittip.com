@@ -36,6 +36,9 @@ if 'cancel' in body.keys():
     request.redirect(cancel_url)
 
 
+# fetch the bountysource participant username
+bs_username = bountysource.get_participant_name()
+
 # Why is txn.fetchone not the same as db.fetchone? sigh.
 # I don't think the creation of the transaction below
 # is in the transaction, but it really should be.
@@ -46,7 +49,7 @@ with db.get_transaction() as txn:
         (amount, fee, participant, recorder, note)
         VALUES (%s, %s, %s, %s, %s)
         RETURNING id
-    """, (amount, fee, participant.username, bountysource.participant, note))
+    """, (amount, fee, participant.username, bs_username, note))
 
     # if the exchange was created successfully, append id to IPN params
     if exchange:
@@ -64,10 +67,11 @@ create_ipn_url = '%spayments/gittip_ipn' % (bountysource.api_host)
 create_ipn_response = requests.post(create_ipn_url, data=body)
 log('POST IPN create to Bountysource: %s POST %s' % (create_ipn_response.status_code, create_ipn_url))
 
-# Note: delete exchange if IPN post fails? It should never fail, but you never know.
-# for now, keep it simple.
+if create_ipn_response.status_code not in range(200,301):
+    # Note: delete exchange if IPN post fails? For now, keep things simple and 500.
+    raise Response(500, 'IPN create failed')
 
-# post to bountysource to get to receipt page!
+# post to bountysource to get the receipt page!
 return_url = '%spayments/gittip_return' % (bountysource.api_host)
 return_response = requests.post(return_url, data=body, allow_redirects=True)
 log('Return to Bountysource: %s POST %s' % (return_response.status_code, return_url))

@@ -8,11 +8,14 @@ from gittip.elsewhere import bountysource
 
 # ids for Bountysource exchange rows
 def bountysource_exchange_ids(username):
+    # fetch the bountysource participant username
+    bs_username = bountysource.get_participant_name()
+    
     # fetch bountysource exchanges
     exchanges = list(db.fetchall( "SELECT id FROM exchanges "
                                       "WHERE recorder=%s "
                                       "ORDER BY timestamp ASC"
-                                    , (bountysource.participant,)
+                                    , (bs_username,)
                                      ))
     # map bountysource exchange ids
     return [ row['id'] for row in exchanges ]

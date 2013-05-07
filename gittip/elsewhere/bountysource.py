@@ -12,7 +12,7 @@ from gittip import db
 from gittip.models import Participant
 from gittip.elsewhere import ACTIONS, AccountElsewhere, _resolve
 
-participant = 'Bountysource'
+participant_name = os.environ['BOUNTYSOURCE_PARTICIPANT'].decode('ASCII')
 www_host = os.environ['BOUNTYSOURCE_WWW_HOST'].decode('ASCII')
 api_host = os.environ['BOUNTYSOURCE_API_HOST'].decode('ASCII')
 
@@ -22,6 +22,36 @@ class BountysourceAccount(AccountElsewhere):
     def get_url(self):
         url = "https://www.bountysource.com/#users/%s" % self.user_info["slug"]
         return url
+
+
+def get_participant_name():
+    """Find or create the Participant representing Bountysource
+    
+    TODO better way to accomplish this?
+    
+    :returns:
+        username of the Bountysource participant
+    """
+    row = db.fetchone("""
+        SELECT username
+        FROM participants
+        WHERE username=%s
+    """, (participant_name,))
+    
+    if row:
+        return row['username']
+    
+    else:
+        # create the participant
+        row = db.fetchone("""
+            INSERT INTO participants
+            (username, username_lower)
+            VALUES (%s, %s)
+            RETURNING username
+        """, (participant_name, participant_name))
+        
+        if row:
+            return row['username']
 
 
 def create_access_token(participant):
