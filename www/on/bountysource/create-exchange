@@ -14,7 +14,7 @@ if user.ANON:
 
 if not POST:
     raise Response(405)
-
+    
 token = body.get('access_token', '')
 participant = bountysource.get_participant_via_access_token(token)
 
@@ -30,6 +30,11 @@ try:
     cancel_url = body.get('cancel_url', bountysource.www_host)
 except:
     raise Response(422)
+    
+# clicked the Cancel button
+if 'cancel' in body.keys():
+    request.redirect(cancel_url)
+
 
 # Why is txn.fetchone not the same as db.fetchone? sigh.
 # I don't think the creation of the transaction below

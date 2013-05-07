@@ -16,7 +16,6 @@ item_name = qs.get('item_name')
 item_number = qs['item_number']
 
 # ========================================= ^L
-
 {% extends templates/base.html %}
 
 {% block heading %}
@@ -42,7 +41,7 @@ item_number = qs['item_number']
             <input type="hidden" name="cancel_url" value="{{ cancel_url }}">
             
             <button id="approve">Approve</button>
-            <button id="cancel">Cancel</button>
+            <button id="cancel" name="cancel">Cancel</button>
         </form>
     </div>
 {% end %}
