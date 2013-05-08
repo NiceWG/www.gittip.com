@@ -1,7 +1,6 @@
 from aspen import log, Response
 from aspen.utils import to_age
 from gittip import db, AMOUNTS
-from gittip.elsewhere import github, bountysource
 from gittip.models.participant import Participant
 
 def _wrap(raw):
@@ -133,22 +132,6 @@ receivers = _wrap(db.fetchall("""
                 <button type="submit">Go</button>
             </span>
         </form>
-        {% if not user.ANON and user.balance > 0 %}
-            <br /><hr /><br />
-            <div class='bountysource-content'>
-                <p>Use your <span class='account-balance'>${{ user.balance }}</span> balance to create bounties.</p>
-                <form id="bountysource-issue-search" action="/on/bountysource/search" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    
-                    <span class="luxury">
-                        <input type="search" name="query" placeholder="Enter an issue URL..." />
-                    </span>
-                    <span class="nowrap">
-                        <button type="submit">Search</button>
-                    </span>
-                </form>
-            </div>
-        {% end %}
     </div>
 {% end %}
 {% block page %}
