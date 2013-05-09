@@ -25,7 +25,6 @@ log('Authorize Bountysource payment with params: %s' % body)
 
 try:
     amount = Decimal(body['amount'])
-    fee = Decimal(body.get('fee', '0.0'))
     note = body['item_number']
     cancel_url = body.get('cancel_url', bountysource.www_host)
 except:
@@ -44,16 +43,16 @@ bs_username = bountysource.get_participant_name()
 # is in the transaction, but it really should be.
 with db.get_transaction() as txn:
     # create the exchange, returning the ID
-    exchange = db.fetchone("""
-        INSERT INTO exchanges
-        (amount, fee, participant, recorder, note)
-        VALUES (%s, %s, %s, %s, %s)
+    transfer = db.fetchone("""
+        INSERT INTO transfers
+        (tipper, tippee, amount)
+        VALUES (%s, %s, %s, %s)
         RETURNING id
-    """, (amount, fee, participant.username, bs_username, note))
+    """, (participant.username, bs_username, amount, note))
 
     # if the exchange was created successfully, append id to IPN params
-    if exchange:
-        body['txn_id'] = int(exchange['id'])
+    if transfer:
+        body['txn_id'] = int(transfer['id'])
 
     # update balance of participant
     txn.execute("""

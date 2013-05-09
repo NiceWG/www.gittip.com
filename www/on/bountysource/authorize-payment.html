@@ -23,7 +23,7 @@ item_number = qs['item_number']
 {% end %}    
 {% block box %}
     <div class="as-content">
-        <form id="authorize-bountysource-payment" action="create-exchange" method="POST">
+        <form id="authorize-bountysource-payment" action="create-transfer" method="POST">
             {% if item_name %}
                 <p>Authorize <span id="amount">${{ amount + fee }}</span> payment for <span id="item-name">{{ item_name }}</span>?</p>
             {% else %}

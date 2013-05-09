@@ -8,9 +8,8 @@ from gittip.elsewhere import bountysource
 
 token = qs.get('access_token', '')
 txn_id = int(qs.get('txn_id', 0))
-item_number = qs.get('item_number')
 amount = qs.get('amount')
-fee = qs.get('fee')
+note = qs.get('item_number')
 
 # try to get participant from token
 participant = bountysource.get_participant_via_access_token(token)
@@ -20,13 +19,13 @@ if participant:
     bs_username = bountysource.get_participant_name()
     
     # if there is an exchange for the person with this id, it's valid
-    exchange = db.fetchone("""
+    transfer = db.fetchone("""
         SELECT id
-        FROM exchanges
-        WHERE id=%s AND participant=%s AND recorder=%s AND note=%s AND amount=%s AND fee=%s
-    """, (txn_id, participant.username, bs_username, item_number, amount, fee))
+        FROM transfers
+        WHERE id=%s AND tipper=%s AND tippee=%s AND amount=%s AND note=%s
+    """, (txn_id, participant.username, bs_username, amount, note))
     
-    if exchange:
+    if transfer:
         response.code = 200
     else:
         response.code = 400

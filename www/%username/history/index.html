@@ -6,32 +6,6 @@ from gittip import db, AMOUNTS
 from gittip.utils import get_participant
 from gittip.elsewhere import bountysource
 
-# ids for Bountysource exchange rows
-def bountysource_exchange_ids(username):
-    # fetch the bountysource participant username
-    bs_username = bountysource.get_participant_name()
-    
-    # fetch bountysource exchanges
-    exchanges = list(db.fetchall( "SELECT id FROM exchanges "
-                                      "WHERE recorder=%s "
-                                      "ORDER BY timestamp ASC"
-                                    , (bs_username,)
-                                     ))
-    # map bountysource exchange ids
-    return [ row['id'] for row in exchanges ]
-
-
-# select bountysource exchanges for Participant (through username)
-def select_bountysource_exchanges(username):
-    ids = bountysource_exchange_ids(username)
-    exchanges = list(db.fetchall( "SELECT * FROM exchanges "
-                                    "WHERE participant=%s "
-                                    "ORDER BY timestamp ASC"
-                                  , (username,)
-                                   ))
-    return [ e for e in exchanges if e['id'] in ids ]
-
-
 class Paydays(object):
 
     def __init__(self, username, balance):
@@ -51,10 +25,6 @@ class Paydays(object):
                                           , (username, username)
                                           ))
         self._balance = balance
-        
-        # filter out bountysource exchanges
-        ids = bountysource_exchange_ids(username)
-        self._exchanges = [ e for e in self._exchanges if e['id'] not in ids ]
 
 
     def __iter__(self):
@@ -180,7 +150,6 @@ class Paydays(object):
 
 participant = get_participant(request, restrict=True)
 paydays = Paydays(participant.username, participant.balance)
-bounties = select_bountysource_exchanges(participant.username)
 hero = "History"
 title = "%s - %s" % (participant.username, hero)
 locked = False
@@ -212,7 +181,7 @@ locked = False
         {% end %}
     </td></tr>
 
-    {% if bounties %}
+    {% if False %}
         <tr>
             <th colspan="7">
                 <h2>Bounties via <a href="{{ bountysource.www_host }}">Bountysource</a></h2>
