@@ -110,6 +110,13 @@ class Paydays(object):
                         received['n'] += 1
 
                         #continue  # Don't leak!
+                    
+                    elif event['tippee'] == bountysource.get_participant_name():
+                        
+                        # Bountysource transfer, display a wee bit differently
+                        
+                        event['bank'] = 'Bountysource'
+                        event['item_url'] = bountysource.item_number_to_url(event['note'])
                 
                 events.append(event)
 
@@ -154,6 +161,9 @@ hero = "History"
 title = "%s - %s" % (participant.username, hero)
 locked = False
 
+# fetch name of bountysource participant
+bountysource_username = bountysource.get_participant_name()
+
 # ========================================================================== ^L
 {% extends templates/profile.html %}
 {% block page %}
@@ -180,27 +190,6 @@ locked = False
         </form>
         {% end %}
     </td></tr>
-
-    {% if False %}
-        <tr>
-            <th colspan="7">
-                <h2>Bounties via <a href="{{ bountysource.www_host }}">Bountysource</a></h2>
-            </th>
-        </tr>
-        {% for bounty in bounties %}
-        <tr>
-            <td class="bank">Bountysource</td>
-            <td>{{ bounty['amount'] + bounty['fee'] }}</td>
-            <td class="fees">{{ bounty['fee'] }}</td>
-            <td class="credits"></td>
-            <td class="debits">{{ bounty['amount'] }}</td>
-            <td class="balance"></td>
-            <td class="notes">
-                <a href="{{ bountysource.item_number_to_url(bounty['note']) }}">{{ bountysource.item_number_to_url(bounty['note']) }}</a>
-            </td>
-        </tr>
-        {% end %}
-    {% end %}
 
     {% for event in paydays %}
     {% if event['event'] == 'payday-start' %}
@@ -278,7 +267,11 @@ locked = False
     </tr>
     {% elif event['event'] == 'transfer' %}
     <tr>
-        <td class="bank"></td>
+        <td class="bank">
+        {% if event['tippee'] == bountysource_username %}
+            {{ event['bank'] }}
+        {% end %}
+        </td>
         <td class="card"></td>
         <td class="fees"></td>
 
@@ -298,6 +291,10 @@ locked = False
             {% else %}
             <td class="notes">from someone</td>
             {% end %}
+        {% elif event['tippee'] == bountysource_username %}
+            <td class="notes">
+                <a href="{{ event['item_url'] }}">{{ event['item_url'] }}</a>
+            </td>
         {% else %}
             {% if user.ADMIN %}
             <td class="notes">to

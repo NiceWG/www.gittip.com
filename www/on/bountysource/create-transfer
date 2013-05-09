@@ -45,7 +45,7 @@ with db.get_transaction() as txn:
     # create the exchange, returning the ID
     transfer = db.fetchone("""
         INSERT INTO transfers
-        (tipper, tippee, amount)
+        (tipper, tippee, amount, note)
         VALUES (%s, %s, %s, %s)
         RETURNING id
     """, (participant.username, bs_username, amount, note))
@@ -59,7 +59,7 @@ with db.get_transaction() as txn:
         UPDATE participants
         SET balance = balance - %s
         WHERE username = %s
-    """, (amount + fee, participant.username))
+    """, (amount, participant.username))
 
 # POST to Bountysource to create IPN
 create_ipn_url = '%spayments/gittip_ipn' % (bountysource.api_host)
