@@ -920,6 +920,11 @@ UL.community-memberships {
         }
     }
 }
+.communities {
+    SELECT {
+        width: 98%;
+    }
+}
 
 #profile-edit {
     BUTTON.save, BUTTON.cancel {
@@ -948,11 +953,6 @@ UL.community-memberships {
         }
         .help {
             font: normal 12px/12px $Helvetica;
-        }
-    }
-    .communities {
-        SELECT {
-            width: 98%;
         }
     }
     .goal {
