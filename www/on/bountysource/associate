@@ -10,6 +10,11 @@ from gittip.elsewhere import bountysource
 if user.ANON:
     raise Response(404)
 
+# did something go wrong with account link at Bountysource?
+# redirect to profile page, where an error will be displayed
+if 'bs_error' in qs.keys():
+    request.redirect('/%s?bs_error=%s' % (user.username, qs.get('error', 'Unable to link Bountysource account at this time')))
+
 # Gittip generated access token, passed all the way through the auth process
 token = qs.get('access_token', '')
 
@@ -17,8 +22,12 @@ token = qs.get('access_token', '')
 # it better be the logged in user, dammit.
 participant = bountysource.get_participant_via_access_token(token)
 
-if participant != user:
-    raise Response(400)
+# Don't raise 400, just go to profile.
+# This will be the case if the user clicks the 'Reject' button
+# on the Bountysource account authorize screen.
+if not participant or participant != user:
+    # raise Response(400)
+    request.redirect('/%s' % user.username)
 
 else:
     # create a linked account

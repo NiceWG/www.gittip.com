@@ -33,3 +33,15 @@ form#authorize-bountysource-payment {
     }
     
 }
+
+#bountysource-error {
+    
+    text-align: center;
+    
+    span:first-of-type {
+        
+        color: $light-red;
+        
+    }
+    
+}

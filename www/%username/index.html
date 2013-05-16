@@ -57,6 +57,13 @@ else:
 
 {% if user == participant %}
     <div id="profile-edit">
+        {% if qs.get('bs_error') %}
+            <div id="bountysource-error">
+                <span>Oh no!</span>
+                <span>{{ qs.get('bs_error') }}</span>
+            </div>
+        {% end %}
+        
         {% include "templates/profile-edit.html" %}
     </div>
 {% else %}
